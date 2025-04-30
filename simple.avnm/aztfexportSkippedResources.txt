@@ -1,0 +1,3 @@
+Following resources are marked to be skipped:
+
+- /subscriptions/4896a771-b1ab-4411-bd94-3c8467f1991e/resourceGroups/cptdazavnm/providers/Microsoft.Network/virtualNetworks/spoke6/subnets/subnet6
