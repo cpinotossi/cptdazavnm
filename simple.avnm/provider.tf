@@ -1,10 +1,12 @@
 provider "azurerm" {
+
   features {
   }
-  use_oidc                   = false
-  skip_provider_registration = true
-  subscription_id            = "4896a771-b1ab-4411-bd94-3c8467f1991e"
-  environment                = "public"
-  use_msi                    = false
-  use_cli                    = true
+  # use_oidc = false
+  # skip_provider_registration = true
+  storage_use_azuread = true
+  subscription_id     = var.subscription_id
+  environment         = "public"
+  # use_msi         = false
+  use_cli = true
 }
