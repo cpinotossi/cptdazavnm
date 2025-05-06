@@ -1,12 +1,16 @@
 provider "azurerm" {
-
   features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
   }
-  # use_oidc = false
-  # skip_provider_registration = true
   storage_use_azuread = true
   subscription_id     = var.subscription_id
   environment         = "public"
-  # use_msi         = false
-  use_cli = true
+  use_cli             = true
+}
+
+provider "azapi" {
+  # https://registry.terraform.io/providers/Azure/azapi/latest/docs
+  subscription_id     = var.subscription_id
 }

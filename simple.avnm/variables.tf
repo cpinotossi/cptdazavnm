@@ -29,3 +29,9 @@ variable "location" {
   type        = string
   default     = "northeurope" # Optional: Set a default value
 }
+
+variable "eu_regions" {
+  description = "List of European regions for network manager deployments"
+  type        = list(string)
+  default     = ["westeurope", "northeurope"] # Example regions
+}

@@ -90,12 +90,12 @@ resource "azurerm_network_manager_connectivity_configuration" "network_manager_c
     network_group_id   = azurerm_network_manager_network_group.network_manager_group.id
   }
   hub {
-    resource_id   = azurerm_virtual_network.hub_vnet.id
+    resource_id   = azurerm_virtual_network.hub1_vnet.id
     resource_type = "Microsoft.Network/virtualNetworks"
   }
   depends_on = [
     azurerm_network_manager_network_group.network_manager_group,
-    azurerm_virtual_network.hub_vnet,
+    azurerm_virtual_network.hub1_vnet,
   ]
 }
 
@@ -106,3 +106,12 @@ resource "azurerm_network_manager_deployment" "commit_hub_and_spoke_deployment" 
   scope_access       = "Connectivity"
   configuration_ids  = [azurerm_network_manager_connectivity_configuration.network_manager_connectivity_configuration_hub_and_spoke.id]
 }
+
+# resource "azurerm_network_manager_deployment" "commit_hub_and_spoke_deployment_eu" {
+#   count = length(var.eu_regions) # Creates multiple deployments, one for each region in the 'eu_regions' variable.
+
+#   network_manager_id = azurerm_network_manager.network_manager.id # References the ID of the Azure Network Manager.
+#   location           = var.eu_regions[count.index] # Dynamically sets the location for each deployment based on the current region in 'eu_regions'.
+#   scope_access       = "Connectivity" # Specifies the scope of the deployment as "Connectivity".
+#   configuration_ids  = [azurerm_network_manager_connectivity_configuration.network_manager_connectivity_configuration_hub_and_spoke.id] # References the ID of the connectivity configuration to be deployed.
+# }

@@ -1,26 +1,26 @@
-resource "azurerm_virtual_network" "hub_vnet" {
+resource "azurerm_virtual_network" "hub1_vnet" {
   address_space       = ["10.0.0.0/16"]
   location            = azurerm_resource_group.rg.location
   name                = "hub0"
   resource_group_name = azurerm_resource_group.rg.name
 }
-resource "azurerm_subnet" "hub_subnet_firewall_mgmt" {
+resource "azurerm_subnet" "hub1_subnet_firewall_mgmt" {
   address_prefixes     = ["10.0.2.0/24"]
   name                 = "AzureFirewallManagementSubnet"
   resource_group_name  = azurerm_resource_group.rg.name
-  virtual_network_name = azurerm_virtual_network.hub_vnet.name
+  virtual_network_name = azurerm_virtual_network.hub1_vnet.name
 }
-resource "azurerm_subnet" "hub_subnet_firewall" {
+resource "azurerm_subnet" "hub1_subnet_firewall" {
   address_prefixes     = ["10.0.1.0/24"]
   name                 = "AzureFirewallSubnet"
   resource_group_name  = azurerm_resource_group.rg.name
-  virtual_network_name = azurerm_virtual_network.hub_vnet.name
+  virtual_network_name = azurerm_virtual_network.hub1_vnet.name
 }
-resource "azurerm_subnet" "hub_subnet" {
+resource "azurerm_subnet" "hub1_subnet" {
   address_prefixes     = ["10.0.0.0/24"]
   name                 = "default"
   resource_group_name  = azurerm_resource_group.rg.name
-  virtual_network_name = azurerm_virtual_network.hub_vnet.name
+  virtual_network_name = azurerm_virtual_network.hub1_vnet.name
 }
 
 resource "azurerm_virtual_network" "spoke1_vnet" {
