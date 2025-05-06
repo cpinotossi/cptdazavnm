@@ -8,6 +8,7 @@ $env:TF_VAR_subscription_id = $subscriptionId
 tf init
 tf fmt
 tf validate
+tf destroy --auto-approve
 tf plan --out=01.tfplan
 terraform apply --auto-approve 01.tfplan
 ~~~

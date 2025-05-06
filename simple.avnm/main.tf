@@ -107,6 +107,77 @@ resource "azurerm_network_manager_deployment" "commit_hub_and_spoke_deployment" 
   configuration_ids  = [azurerm_network_manager_connectivity_configuration.network_manager_connectivity_configuration_hub_and_spoke.id]
 }
 
+####################################################
+# routing configuration
+####################################################
+
+locals {
+  routing_config_hubspoke_rule_col_rules = [
+    {
+      name             = "default-ipv4"
+      type             = "AddressPrefix"
+      address_prefix   = "0.0.0.0/0"
+      next_hop_type    = "VirtualAppliance"
+      next_hop_address = module.hub1.firewall_private_ip
+    },
+  ]
+}
+
+resource "azapi_resource" "routing_config_hubspoke" {
+  type      = "Microsoft.Network/networkManagers/routingConfigurations@2022-06-01-preview"
+  name      = "routing-config-hubspoke"
+  parent_id = local.network_manager.id
+
+  body = jsonencode({
+    properties = {
+      description = "Routing configuration for hub-spoke topology"
+    }
+  })
+  schema_validation_enabled = false
+}
+
+resource "azapi_resource" "routing_config_hubspoke_rule_col" {
+  type      = "Microsoft.Network/networkManagers/routingConfigurations/ruleCollections@2022-06-01-preview"
+  name      = "rule-col-hubspoke-region1"
+  parent_id = azapi_resource.routing_config_hubspoke.id
+
+  body = jsonencode({
+    properties = {
+      description       = "region1"
+      localRouteSetting = "DirectRoutingWithinVNet"
+      appliesTo = [
+        {
+          networkGroupId = azurerm_network_manager_network_group.network_manager_group.id
+        }
+      ]
+      disableBgpRoutePropagation = "True"
+    }
+  })
+  schema_validation_enabled = false
+}
+
+resource "azapi_resource" "routing_config_hubspoke_rule_col_rules" {
+  for_each  = { for r in local.routing_config_hubspoke_rule_col_rules : r.name => r }
+  type      = "Microsoft.Network/networkManagers/routingConfigurations/ruleCollections/rules@2022-06-01-preview"
+  name      = each.value.name
+  parent_id = azapi_resource.routing_config_hubspoke_rule_col.id
+
+  body = jsonencode({
+    properties = {
+      destination : {
+        type               = each.value.type
+        destinationAddress = each.value.address_prefix
+      },
+      nextHop : {
+        nextHopType    = each.value.next_hop_type
+        nextHopAddress = each.value.next_hop_address
+      }
+    }
+  })
+  schema_validation_enabled = false
+}
+
+
 # resource "azurerm_network_manager_deployment" "commit_hub_and_spoke_deployment_eu" {
 #   count = length(var.eu_regions) # Creates multiple deployments, one for each region in the 'eu_regions' variable.
 
