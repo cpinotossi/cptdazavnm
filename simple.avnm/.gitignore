@@ -1,0 +1,3 @@
+# Exclude the misc folder and all its subfolders from Git versioning
+misc/
+*.tfplan
