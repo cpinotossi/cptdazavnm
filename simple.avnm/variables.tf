@@ -1,7 +1,26 @@
-variable "allow_icmp" {
-  description = "Allow ICMP traffic"
+variable "landingzone_subs" {
+  description = "Subscription to Landingzone mapping"
+  type        = map(string)
+  default = {
+    root_1         = "4b353dc5-a216-485d-8f77-a0943546b42c" # sub-05
+    app_lz_1       = "11c61beb-b32b-4166-9d6c-74cb3a2e04da" # sub-08
+    app_lz_2       = "65668fbe-24d6-410e-b9b7-b9e52a499caf" # sub-09
+    sandbox_1      = "7777febc-d5d8-44da-b990-643c8369f1e1" # sub-06
+    plattform_lz_1 = "d3856ecd-977c-4651-ab8a-8208fe79dfac" # sub-04
+  }
+}
+
+variable "management_group_root_id" {
+  description = "The Azure Management Group ID"
   type        = string
-  default     = "Allow"
+  # default     = "/providers/Microsoft.Management/managementGroups/cptdx.net"
+  default = "/providers/Microsoft.Management/managementGroups/cptdx.net"
+}
+
+variable "management_group_applications_id" {
+  description = "The Azure Management Group ID"
+  type        = string
+  default     = "/providers/Microsoft.Management/managementGroups/applications"
 }
 
 variable "cidrs" {
@@ -23,16 +42,10 @@ variable "cidrs" {
   }
 }
 
-variable "landingzone_subs" {
-  description = "Subscription to Landingzone mapping"
-  type        = map(string)
-  default = {
-    root_1         = "4b353dc5-a216-485d-8f77-a0943546b42c" # sub-05
-    app_lz_1       = "11c61beb-b32b-4166-9d6c-74cb3a2e04da" # sub-08
-    app_lz_2       = "65668fbe-24d6-410e-b9b7-b9e52a499caf" # sub-09
-    sandbox_1      = "7777febc-d5d8-44da-b990-643c8369f1e1" # sub-06
-    plattform_lz_1 = "d3856ecd-977c-4651-ab8a-8208fe79dfac" # sub-04
-  }
+variable "allow_icmp" {
+  description = "Allow ICMP traffic"
+  type        = string
+  default     = "Allow"
 }
 
 variable "source_image" {
@@ -55,24 +68,6 @@ variable "prefix" {
   description = "default name"
   type        = string
   default     = "cptdazavnm"
-}
-
-# # Define a variable for the subscription ID
-# variable "subscription_id" {
-#   description = "The Azure subscription ID"
-#   type        = string
-# }
-
-variable "management_group_root_id" {
-  description = "The Azure Management Group ID"
-  type        = string
-  # default     = "/providers/Microsoft.Management/managementGroups/cptdx.net"
-  default = "/providers/Microsoft.Management/managementGroups/cptdx.net"
-}
-variable "management_group_landingzones_id" {
-  description = "The Azure Management Group ID"
-  type        = string
-  default     = "/providers/Microsoft.Management/managementGroups/landingzones"
 }
 
 variable "admin_password" {

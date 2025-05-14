@@ -12,12 +12,12 @@ resource "azurerm_network_manager" "network_manager_mg_root" {
   }
   provider = azurerm.plattform_lz_1
   depends_on = [
-    azurerm_resource_group.rg,
+    azurerm_resource_group.rg_plattform_lz_1,
   ]
 }
 
 ####################################################
-# network group
+# network group spoke
 ####################################################
 
 resource "azurerm_network_manager_network_group" "network_manager_group_spokes" {
@@ -85,9 +85,13 @@ resource "azurerm_network_manager_connectivity_configuration" "network_manager_c
   name                            = "${var.prefix}connectivityhubandspoke"
   global_mesh_enabled             = false
   network_manager_id              = azurerm_network_manager.network_manager_mg_root.id
+  # applies_to_group {
+  #   group_connectivity = "None"
+  #   network_group_id   = azurerm_network_manager_network_group.network_manager_group_spokes.id
+  # }
   applies_to_group {
     group_connectivity = "None" # not DirectlyConnected
-    network_group_id   = azurerm_network_manager_network_group.network_manager_group_spokes.id
+    network_group_id   = azurerm_network_manager_network_group.network_manager_group_trusted.id
   }
   hub {
     resource_id   = azurerm_virtual_network.hub1_vnet.id
@@ -100,11 +104,11 @@ resource "azurerm_network_manager_connectivity_configuration" "network_manager_c
 }
 
 resource "azurerm_network_manager_deployment" "commit_hub_and_spoke_deployment_eu" {
-  count              = length(var.eu_regions)                                                                                           # Creates multiple deployments, one for each region in the 'eu_regions' variable.
-  network_manager_id = azurerm_network_manager.network_manager_mg_root.id                                                               # References the ID of the Azure Network Manager.
-  location           = var.eu_regions[count.index]                                                                                      # Dynamically sets the location for each deployment based on the current region in 'eu_regions'.
-  scope_access       = "Connectivity"                                                                                                   # Specifies the scope of the deployment as "Connectivity".
-  configuration_ids  = [azurerm_network_manager_connectivity_configuration.network_manager_connectivity_configuration_hub_and_spoke.id] # References the ID of the connectivity configuration to be deployed.
+  count              = length(var.eu_regions)
+  network_manager_id = azurerm_network_manager.network_manager_mg_root.id
+  location           = var.eu_regions[count.index]
+  scope_access       = "Connectivity"
+  configuration_ids  = [azurerm_network_manager_connectivity_configuration.network_manager_connectivity_configuration_hub_and_spoke.id]
   provider           = azurerm.plattform_lz_1
 }
 

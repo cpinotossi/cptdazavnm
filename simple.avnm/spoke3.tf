@@ -4,7 +4,6 @@ resource "azurerm_virtual_network" "spoke3_vnet" {
   resource_group_name = azurerm_resource_group.rg_sandbox_1.name
   address_space       = ["${var.cidrs["spoke3"]}"]
   tags = {
-    trusted   = "false"
     vnet_type = "spoke"
   }
   provider = azurerm.sandbox_1
@@ -33,8 +32,10 @@ module "spoke3_vm" {
   password               = var.admin_password
   use_vm_custom_data     = false
   custom_data            = base64encode("python3 -m http.server")
-  depends_on             = [azurerm_subnet.spoke3_subnet]
-  admin_principal_id     = data.azurerm_client_config.current.object_id
+  depends_on = [
+    azurerm_subnet.spoke3_subnet
+  ]
+  admin_principal_id = data.azurerm_client_config.current.object_id
   providers = {
     azurerm.default = azurerm.sandbox_1
   }
@@ -46,9 +47,12 @@ module "spoke3_nsg" {
   location            = azurerm_resource_group.rg_sandbox_1.location
   resource_group_name = azurerm_resource_group.rg_sandbox_1.name
   allow_icmp          = var.allow_icmp
-  subnet_ids          = [azurerm_subnet.spoke3_subnet.id]
+  subnet_id           = azurerm_subnet.spoke3_subnet.id
   providers = {
     azurerm.default = azurerm.sandbox_1
   }
+  depends_on = [
+    azurerm_subnet.spoke3_subnet
+  ]
 }
 

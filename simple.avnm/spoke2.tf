@@ -1,11 +1,10 @@
 resource "azurerm_virtual_network" "spoke2_vnet" {
-  name                = "spoke2applz"
+  name                = "spoke2"
   location            = azurerm_resource_group.rg_app_lz_2.location
   resource_group_name = azurerm_resource_group.rg_app_lz_2.name
   address_space       = ["${var.cidrs["spoke2"]}"]
   tags = {
-    trusted   = "true"
-    vnet_type = "spoke"
+    vnet_type = "trusted"
   }
   provider = azurerm.app_lz_2
 }
@@ -33,8 +32,10 @@ module "spoke2_vm" {
   password               = var.admin_password
   use_vm_custom_data     = false
   custom_data            = base64encode("python3 -m http.server")
-  depends_on             = [azurerm_subnet.spoke2_subnet]
-  admin_principal_id     = data.azurerm_client_config.current.object_id
+  depends_on = [
+    azurerm_subnet.spoke2_subnet
+  ]
+  admin_principal_id = data.azurerm_client_config.current.object_id
   providers = {
     azurerm.default = azurerm.app_lz_2
   }
@@ -46,9 +47,12 @@ module "spoke2_nsg" {
   location            = azurerm_resource_group.rg_app_lz_2.location
   resource_group_name = azurerm_resource_group.rg_app_lz_2.name
   allow_icmp          = var.allow_icmp
-  subnet_ids          = [azurerm_subnet.spoke2_subnet.id]
+  subnet_id           = azurerm_subnet.spoke2_subnet.id
   providers = {
     azurerm.default = azurerm.app_lz_2
   }
+  depends_on = [
+    azurerm_subnet.spoke2_subnet
+  ]
 }
 

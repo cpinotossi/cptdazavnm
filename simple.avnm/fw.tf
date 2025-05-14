@@ -54,6 +54,19 @@ resource "azurerm_firewall_policy_rule_collection_group" "spoke_to_spoke" {
       destination_ports = ["*"]
       protocols         = ["TCP", "UDP", "ICMP"]
     }
+    rule {
+      name = "allow-ifconfig-io-http"
+      source_addresses = [
+        "${var.cidrs["spoke1"]}",
+        "${var.cidrs["spoke2"]}",
+        "${var.cidrs["spoke3"]}"
+      ]
+
+      destination_addresses = ["104.21.92.106"]
+
+      destination_ports = ["80"]
+      protocols         = ["TCP"]
+    }
   }
   provider = azurerm.plattform_lz_1
 }

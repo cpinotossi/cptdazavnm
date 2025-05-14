@@ -1,11 +1,10 @@
 resource "azurerm_virtual_network" "spoke1_vnet" {
-  name                = "spoke1applz"
+  name                = "spoke1"
   location            = azurerm_resource_group.rg_app_lz_1.location
   resource_group_name = azurerm_resource_group.rg_app_lz_1.name
   address_space       = ["${var.cidrs["spoke1"]}"]
   tags = {
-    trusted   = "true"
-    vnet_type = "spoke"
+    vnet_type = "trusted"
   }
   provider = azurerm.app_lz_1
 }
@@ -46,9 +45,12 @@ module "spoke1_nsg" {
   location            = azurerm_resource_group.rg_app_lz_1.location
   resource_group_name = azurerm_resource_group.rg_app_lz_1.name
   allow_icmp          = var.allow_icmp
-  subnet_ids          = [azurerm_subnet.spoke1_subnet.id]
+  subnet_id           = azurerm_subnet.spoke1_subnet.id
   providers = {
     azurerm.default = azurerm.app_lz_1
   }
+  depends_on = [
+    azurerm_subnet.spoke1_subnet
+  ]
 }
 

@@ -15,6 +15,8 @@ tf fmt
 tf validate
 # tf destroy --auto-approve
 tf plan --out=01.tfplan
+
+tf destroy --auto-approve
 tf apply --auto-approve
 
 

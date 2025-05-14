@@ -37,7 +37,7 @@ resource "azapi_resource" "routing_config_hubspoke_rule_collection" {
   body = {
     properties = {
       description       = "rule collection for hub-spoke topology"
-      localRouteSetting = "DirectRoutingWithinVNet"
+      # localRouteSetting = "DirectRoutingWithinVNet"
       appliesTo = [
         {
           networkGroupId = azurerm_network_manager_network_group.network_manager_group_spokes.id

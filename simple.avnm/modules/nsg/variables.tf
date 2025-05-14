@@ -16,10 +16,10 @@ variable "resource_group_name" {
 variable "allow_icmp" {
   description = "Whether to allow or deny ICMP traffic"
   type        = string
-  default     = "Deny"
+  default     = "Allow"
 }
 
-variable "subnet_ids" {
+variable "subnet_id" {
   description = "List of subnet IDs to associate with the NSG"
-  type        = list(string)
+  type        = string
 }

@@ -1,7 +1,7 @@
 
 
 resource "azurerm_storage_account" "storage" {
-  name                     = var.prefix
+  name                     = "${var.prefix}azvnm"
   location                 = azurerm_resource_group.rg_plattform_lz_1.location
   resource_group_name      = azurerm_resource_group.rg_plattform_lz_1.name
   account_tier             = "Standard"

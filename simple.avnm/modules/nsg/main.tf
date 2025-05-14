@@ -29,6 +29,7 @@ resource "azurerm_network_security_rule" "allow_icmp_inbound" {
   destination_address_prefix  = "*" # Adjust to your destination range
   network_security_group_name = azurerm_network_security_group.nsg.name
   provider = azurerm.default
+  depends_on = [ azurerm_network_security_group.nsg ]
 }
 
 # Add an outbound rule to allow or deny ICMP (ping)
@@ -45,13 +46,13 @@ resource "azurerm_network_security_rule" "allow_icmp_outbound" {
   destination_address_prefix  = "*" # Adjust to your destination range
   network_security_group_name = azurerm_network_security_group.nsg.name
   provider = azurerm.default
+  depends_on = [ azurerm_network_security_group.nsg ]
 }
 
 # Associate the NSG with subnets
 resource "azurerm_subnet_network_security_group_association" "nsg_association" {
-  for_each = toset(var.subnet_ids)
-
-  subnet_id                 = each.value
+  subnet_id                 = var.subnet_id
   network_security_group_id = azurerm_network_security_group.nsg.id
   provider = azurerm.default
+  depends_on = [ azurerm_network_security_group.nsg ]
 }
