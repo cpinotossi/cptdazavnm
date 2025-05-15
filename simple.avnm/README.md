@@ -1,4 +1,10 @@
+# Azure Network Manager with Terraform
 
+This project is a simple demo showcasing Azure Virtual Network Manager (AVNM). It demonstrates how to use AVNM's routing and connectivity configurations within an Azure landing zone-like environment. In this setup, each Virtual Network (VNet) is placed in its own subscription, reflecting a common enterprise scenario for network isolation and management. The included scripts and Terraform configurations illustrate how to register required providers, initialize infrastructure, and manage network configurations (such as routing and connectivity) across multiple subscriptions using AVNM. This helps users understand how to centrally manage and secure network traffic in complex Azure environments.
+
+![Azure Hub-and-Spoke Topology (1 Hub, 3 Spokes)](./azure-hub-spoke.svg)
+
+## Deployment
 
 ~~~powershell
 cd simple.avnm # changfe to this directory if not already there
@@ -18,23 +24,19 @@ tf plan --out=01.tfplan
 
 tf destroy --auto-approve
 tf apply --auto-approve
+~~~
 
+## Open points
+- Deployment of routing has been done with AzAPI, need to wait till it can be done with the azurerm provider
+- Need to clarify how to use Azure Virtual Network Manager in a multi tenant environment
+- Which is the best way to define groups, is the Tag the best option, if yes, how to prevent tag modification?
+- Even if we can use Network Groups in multiple Network Manager, I would avoid it if possible to keep things simple.
+- Which are the cost related to the IPAM?
+- Changes done after the initial deployment did not result into a new AVNM deployment, I need to check if I need to create a new deployment instance after each change. If yes, is it it all a good idea to keep the deployment as IaC?
 
+## [Not Working] Deplyoment of Routing Configurations 
 
-
-
-$body = @'
-{
-    "properties": {
-        "description": "Commit deployment for routing configuration",
-        "scopeAccess": "Routing",
-        "configurationIds": [
-            "/subscriptions/4b353dc5-a216-485d-8f77-a0943546b42c/resourceGroups/cptdavnm/providers/Microsoft.Network/networkManagers/cptdavnm/routingConfigurations/routing-config-hubspoke"
-        ]
-    }
-}
-'@
-
+~~~powershell
 # List all routing configurations in the network manager
 $location = (Get-Content -Path "terraform.tfvars.json" -Raw | ConvertFrom-Json).location
 $prefix = (Get-Content -Path "terraform.tfvars.json" -Raw | ConvertFrom-Json).prefix
@@ -44,28 +46,14 @@ az network manager routing-config list -g $prefix --manager-name $prefix --query
 $routingConfigName="routing-config-hubspoke"
 $routingConfigId=az network manager routing-config show -g $prefix --manager-name $prefix -n $routingConfigName --query "id" -o tsv
 az network manager post-commit --network-manager-name $prefix --commit-type "Routing" --configuration-ids $routingConfigId --target-locations $location -g $prefix --subscription $subId --verbose 
-~~~
-
-Name                     Id
------------------------  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-routing-config-hubspoke  /subscriptions/4b353dc5-a216-485d-8f77-a0943546b42c/resourceGroups/cptdavnm/providers/Microsoft.Network/networkManagers/cptdavnm/routingConfigurations/routing-config-hubspoke
-
-~~~powershell
 # post commit
 az network manager post-commit --network-manager-name $prefix --commit-type "Routing" --configuration-ids "/subscriptions/<subscriptionID>/resourceGroups/resource-group/providers/Microsoft.Network/networkManagers/network-manager/connectivityConfigurations/connectivityconfig" --target-locations "westus2" --resource-group "resource-group"
-
-
 # List all routing configurations in the network manager
 az network manager routing-config list -g $prefix --manager-name $prefix --query "[].{Name:name, Id:id}" -o table
-
-
 # List all routing configurations in the network manager
 az network manager routing-config list
-
-
 # Ensure the network manager name is correctly replaced in the URI
 $networkManagerName = "cptdavnm" # Replace with the actual network manager name
-
 # Construct the URI dynamically
 $uri = "https://management.azure.com/subscriptions/4b353dc5-a216-485d-8f77-a0943546b42c/resourceGroups/cptdavnm/providers/Microsoft.Network/networkManagers/$networkManagerName/deployments/commit-routing-deployment?api-version=2024-05-01"
 
@@ -76,14 +64,9 @@ $subId = (Get-Content -Path "terraform.tfvars.json" -Raw | ConvertFrom-Json).sub
 az network manager post-commit --commit-type Routing --target-locations "northeurope" --configuration-ids "/subscriptions/4b353dc5-a216-485d-8f77-a0943546b42c/resourceGroups/cptdavnm/providers/Microsoft.Network/networkManagers/cptdavnm/routingConfigurations/routing-config-hubspoke" --name "commit-routing-deployment" --resource-group "cptdavnm" --subscription $subId --verbose
 ~~~
 
+# misc
 
-~~~powershell
-$subscriptions = az account list --query "[].id" -o tsv
-foreach ($subscription in $subscriptions) {
-    az account set --subscription $subscription
-    az provider register -n Microsoft.AzureTerraform
-}
-~~~
+## terraform
 
 ### Terraform Debug
 
@@ -91,7 +74,7 @@ foreach ($subscription in $subscriptions) {
 TF_LOG=debug TF_LOG_FILE=debug.log
 ~~~
 
-### flow logs 
+### Analyz flow logs for ICMP traffic been blocked
 
 ~~~powershell
 # Define the path to the flow log file
@@ -172,4 +155,3 @@ Deployment did run into the following issues:
 │    9: resource "azurerm_network_security_rule" "allow_icmp_inbound" {
 
 Afterwards, we needed to clean up some resources manually in the Azure portal.
-
